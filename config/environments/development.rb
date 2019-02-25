@@ -57,4 +57,9 @@ Rails.application.configure do
     host = ENV["SSH_CLIENT"].match(/\A([^\s]*)/)[1]
     BetterErrors::Middleware.allow_ip! host if host
   end
+
+  Rails.application.routes.default_url_options = {
+    host: 'localhost',
+    port: 3000
+  }
 end
