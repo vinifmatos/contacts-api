@@ -1,5 +1,15 @@
 class KindsController < ApplicationController
-  before_action :set_kind, only: [:show, :update, :destroy]
+  TOKEN = 'secret123'
+  include ActionController::HttpAuthentication::Token::ControllerMethods
+
+  # include ActionController::HttpAuthentication::Basic::ControllerMethods
+  # http_basic_authenticate_with name: 'teste', password: 'secret'
+
+  # include ActionController::HttpAuthentication::Digest::ControllerMethods
+  # USERS = { teste: Digest::MD5.hexdigest(['teste', 'Application', 'secret'].join(':')) }
+
+  before_action :authenticate
+  before_action :set_kind, only: %i[show update destroy]
 
   # GET /kinds
   def index
@@ -51,5 +61,17 @@ class KindsController < ApplicationController
     # Only allow a trusted parameter "white list" through.
     def kind_params
       params.require(:kind).permit(:description)
+    end
+
+    def authenticate
+      # authenticate_or_request_with_http_digest("Application") do |username|
+      #   USERS[username]
+      # end
+      authenticate_or_request_with_http_token do |token, options|
+        ActiveSupport::SecurityUtils.secure_compare(
+          ::Digest::SHA256.hexdigest(token),
+          ::Digest::SHA256.hexdigest(TOKEN)
+        )
+      end
     end
 end
