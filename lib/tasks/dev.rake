@@ -1,7 +1,10 @@
 namespace :dev do
   desc "Configura ambinte de desenvolvimento"
   task setup: :environment do
-    %x(`rails db:drop db:create db:migrate`)
+    %x(`rails db:drop db:create db:migrate dev:pop`)
+  end
+
+  task pop: :environment do
     puts 'Criando tipos...'
     kinds = %w[Amigo Comercial Conhecido]
     kinds.each do |k|
@@ -15,7 +18,11 @@ namespace :dev do
         name: Faker::Name.name,
         email: Faker::Internet.email,
         birthdate: Faker::Date.between(35.years.ago, 18.years.ago),
-        kind: Kind.all.sample
+        kind: Kind.all.sample,
+        address: Address.new(
+          street: Faker::Address.street_address,
+          city: Faker::Address.city
+        )
       )
     end
     puts 'Concluído.'
@@ -27,16 +34,6 @@ namespace :dev do
         c.phones << p
         c.save!
       end
-    end
-    puts 'Concluído.'
-
-    puts 'Criando endereços...'
-    Contact.all.each do |c|
-      Address.create!(
-        street: Faker::Address.street_address,
-        city: Faker::Address.city,
-        contact: c
-      )
     end
     puts 'Concluído.'
   end
